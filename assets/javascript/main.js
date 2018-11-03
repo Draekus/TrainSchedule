@@ -31,28 +31,41 @@
         name: nameInput,
         destination: destinationInput,
         start: startInput,
-        frequency: frequencyInput,
-        dateAdded: firebase.database.ServerValue.TIMESTAMP
+        frequency: frequencyInput
+        
     });
 })
 
-database.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function(snapshot){
+database.ref().on("child_added", function(snapshot){
 
     var sv = snapshot.val();
 
     var emptyTR = $("<tr>")
     
-    
+    let frequency = sv.frequency
+    let currenttime = moment()
+    let start = sv.start
+
+    var startConverted = moment(start, "HH:mm").subtract(1, "years");
+    var diffTime = moment().diff(moment(startConverted), "minutes");
+    var tRemainder = diffTime % frequency;
+    var tMinutesTillTrain = frequency - tRemainder;
+    var nextTrain = moment().add(tMinutesTillTrain, "minutes");
+
+
     var nameTD = $("<td>").text(sv.name);
-    var destinationTD = $("<td>").text(sv.role);
-    var startTD = $("<td>").text(sv.startDate);
-    var frequencyTD = $("<td>").text("$" + sv.monthlyRate);
+    var destinationTD = $("<td>").text(sv.destination);
+    var frequencyTD = $("<td>").text(sv.frequency);
+    var nextTrainTD = $("<td>").text(moment(nextTrain).format("HH:mm"))
+    var minUntilTD = $("<td>").text(tMinutesTillTrain)
     
 
     emptyTR.append(nameTD);
     emptyTR.append(destinationTD);
-    emptyTR.append(startTD);
+    
     emptyTR.append(frequencyTD);
+    emptyTR.append(nextTrainTD)
+    emptyTR.append(minUntilTD)
    
     $("tbody").append(emptyTR);
 
